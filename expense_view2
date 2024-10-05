@@ -1,0 +1,37 @@
+SELECT 
+    Organization_Master."For_Control" AS "for_control",
+    Expense_YellowFin."Fiscal_Year" AS "fiscal_year",
+    Expense_YellowFin."MonthYear" AS "month_year",
+    Organization_Master."Div" AS "div",
+    Organization_Master."Group" AS "group",
+    Organization_Master."Division_Name" AS "department",
+    SUM(Expense_YellowFin."Target") AS "sum_target",
+    SUM(Expense_YellowFin."Actual") AS "sum_actual",
+    SUM(Expense_YellowFin."Actual") - SUM(Expense_YellowFin."Target") AS "diff",
+    CASE
+        WHEN SUM(Expense_YellowFin."Target") = 0 THEN '0.00%'  
+        ELSE TO_CHAR((SUM(Expense_YellowFin."Actual") / SUM(Expense_YellowFin."Target")) * 100, 'FM990.00') || '%' 
+    END AS "ratio",
+    CASE
+        WHEN SUM(Expense_YellowFin."Actual") > SUM(Expense_YellowFin."Target") THEN 0  
+        ELSE 1 
+    END AS "eva"
+FROM
+    Expense_YellowFin
+JOIN
+    Organization_Master
+ON
+    Expense_YellowFin."Department_Code" = Organization_Master."Department_Code"
+GROUP BY
+    Organization_Master."For_Control",
+    Expense_YellowFin."Fiscal_Year",
+    Expense_YellowFin."MonthYear",
+    Organization_Master."Div",
+    Organization_Master."Group",
+    Organization_Master."Division_Name"
+ORDER BY
+    Expense_YellowFin."Fiscal_Year" ASC,  
+    Expense_YellowFin."MonthYear" ASC,    
+    Organization_Master."For_Control" ASC, 
+    Organization_Master."Div" ASC,        
+    Organization_Master."Group" ASC
